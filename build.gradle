@@ -1,0 +1,30 @@
+apply plugin: "groovy"
+
+final installDir = System.getProperty("user.home") + "/bin/groovy"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.1.3'
+}
+
+task install (dependsOn: jar) {
+    copy {
+        from 'build/libs'
+        into System.getProperty("user.home") + "/.groovy/lib"
+        include '**/*.jar'
+    }
+    copy {
+        from 'src/main/scripts'
+        into installDir
+        include '**/*.groovy'
+        rename '(.+)\\.groovy', '$1'
+    }
+    new File(installDir).eachFile {
+        if (! it.name.contains(".")) {
+            ant.chmod file: it, perm: "775"
+        }
+    }
+}
